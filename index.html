@@ -24,7 +24,6 @@
 
     /* ============================================
        GLOBAL DOT GRID BACKGROUND
-       Applied to body so it covers everything
        ============================================ */
     body {
       background-color: #151517;
@@ -34,7 +33,6 @@
 
     /* ============================================
        HEADER / BRANDING
-       Centered logo only, no subtitle
        ============================================ */
     #header {
       position: fixed;
@@ -63,9 +61,6 @@
 
     /* ============================================
        MAIN LAYOUT CONTAINER
-       Two-column layout: 2/3 left + 1/3 right
-       Shifted to the right and centered vertically
-       with increased top/bottom margins
        ============================================ */
     #main-container {
       position: fixed;
@@ -85,9 +80,6 @@
 
     /* ============================================
        LEFT SIDE - BEVELED 3D BOX
-       Takes up approximately 2/3 of the screen.
-       Uses layered box-shadows to create a subtle
-       beveled/raised effect with depth.
        ============================================ */
     #bevel-container {
       flex: 0 0 65%;
@@ -128,9 +120,51 @@
     }
 
     /* ============================================
+       HOVER TOOLTIP
+       ============================================ */
+    #hover-tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 200;
+      background: rgba(21, 21, 23, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #e8e8ec;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translate(-50%, -100%) translateY(-12px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.4),
+        0 0 8px rgba(59, 130, 246, 0.1);
+    }
+
+    #hover-tooltip.visible {
+      opacity: 1;
+      transform: translate(-50%, -100%) translateY(-8px);
+    }
+
+    #hover-tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 6px solid rgba(59, 130, 246, 0.25);
+    }
+
+    /* ============================================
        RIGHT SIDE - INFO PANEL
-       Takes up approximately 1/3 of the screen.
-       Same beveled style for visual consistency.
        ============================================ */
     #info-panel {
       flex: 1;
@@ -429,6 +463,9 @@
     <div id="loader-text">Loading 3D Model...</div>
   </div>
 
+  <!-- Hover Tooltip -->
+  <div id="hover-tooltip"></div>
+
   <div id="header">
     <h1>arobicmd</h1>
   </div>
@@ -515,6 +552,7 @@
     const partDesc = document.getElementById('part-description');
     const injuriesList = document.getElementById('injuries-list');
     const closeBtn = document.getElementById('close-btn');
+    const hoverTooltip = document.getElementById('hover-tooltip');
 
     const INJURY_DATA = {
       "UpperLeg": {
@@ -563,6 +601,15 @@
           { name: "Trochanteric Bursitis", detail: "Inflammation of the bursa on the outer hip. Pain worsens when lying on affected side.", severity: 1 }
         ]
       }
+    };
+
+    // Display name mapping for hover tooltip
+    const DISPLAY_NAMES = {
+      "Hip": "Hip & Glutes",
+      "UpperLeg": "Upper Leg",
+      "Knee": "Knee",
+      "LowerLeg": "Lower Leg",
+      "Ankle": "Ankle & Foot"
     };
 
     const scene = new THREE.Scene();
@@ -637,9 +684,11 @@
         
         scene.add(loadedModel);
         
+        // Store original material data for hover effects
         loadedModel.traverse((child) => {
-          if (child.isMesh) {
-            child.userData.originalEmissive = child.material && child.material.emissive ? child.material.emissive.getHex() : 0x000000;
+          if (child.isMesh && child.material) {
+            child.userData.originalEmissive = child.material.emissive ? child.material.emissive.getHex() : 0x000000;
+            child.userData.originalEmissiveIntensity = child.material.emissiveIntensity || 0.5;
           }
         });
         
@@ -695,6 +744,8 @@
 
     canvas.addEventListener('mouseleave', () => {
       isScrollPressed = false;
+      hideTooltip();
+      resetAllHoverGlow();
     });
 
     canvas.addEventListener('mousemove', (event) => {
@@ -797,8 +848,12 @@
       }
     }
 
+    // Track previously hovered group for tooltip
+    let currentHoverGroup = null;
+
     canvas.addEventListener('mousemove', (event) => {
-      if (!loadedModel || isScrollPressed) return;
+      if (isScrollPressed) return;
+      if (!loadedModel) return;
 
       const rect = canvas.getBoundingClientRect();
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -807,22 +862,92 @@
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObject(loadedModel, true);
 
+      // Reset all meshes to original state
       loadedModel.traverse((child) => {
         if (child.isMesh && child.material) {
           child.material.emissive.setHex(child.userData.originalEmissive || 0x000000);
+          child.material.emissiveIntensity = child.userData.originalEmissiveIntensity || 0.5;
         }
       });
 
       if (intersects.length > 0) {
         const hoveredMesh = intersects[0].object;
-        if (hoveredMesh.material) {
-          hoveredMesh.material.emissive.setHex(0x1a2332);
+        
+        // Find the parent group name
+        const regionName = getRegionName(hoveredMesh);
+        
+        if (regionName) {
+          // Apply strong hover glow to the hovered mesh
+          if (hoveredMesh.material) {
+            hoveredMesh.material.emissive.setHex(0x3b82f6);
+            hoveredMesh.material.emissiveIntensity = 0.8;
+          }
+
+          // Also highlight siblings in the same group
+          const parentGroup = hoveredMesh.parent;
+          if (parentGroup && parentGroup.isGroup) {
+            parentGroup.traverse((child) => {
+              if (child.isMesh && child !== hoveredMesh && child.material) {
+                child.material.emissive.setHex(0x1a3a5a);
+                child.material.emissiveIntensity = 0.3;
+              }
+            });
+          }
+
+          // Show tooltip
+          if (regionName !== currentHoverGroup) {
+            currentHoverGroup = regionName;
+            const displayName = DISPLAY_NAMES[regionName] || regionName;
+            showTooltip(displayName, event.clientX, event.clientY);
+          } else {
+            updateTooltipPosition(event.clientX, event.clientY);
+          }
         }
+
         canvas.style.cursor = 'pointer';
       } else {
         canvas.style.cursor = 'grab';
+        hideTooltip();
+        currentHoverGroup = null;
       }
     });
+
+    function getRegionName(mesh) {
+      let current = mesh;
+      while (current) {
+        if (current.name && INJURY_DATA[current.name]) {
+          return current.name;
+        }
+        current = current.parent;
+      }
+      return null;
+    }
+
+    function showTooltip(text, x, y) {
+      hoverTooltip.textContent = text;
+      hoverTooltip.classList.add('visible');
+      hoverTooltip.style.left = x + 'px';
+      hoverTooltip.style.top = (y - 10) + 'px';
+    }
+
+    function updateTooltipPosition(x, y) {
+      hoverTooltip.style.left = x + 'px';
+      hoverTooltip.style.top = (y - 10) + 'px';
+    }
+
+    function hideTooltip() {
+      hoverTooltip.classList.remove('visible');
+    }
+
+    function resetAllHoverGlow() {
+      if (!loadedModel) return;
+      loadedModel.traverse((child) => {
+        if (child.isMesh && child.material) {
+          child.material.emissive.setHex(child.userData.originalEmissive || 0x000000);
+          child.material.emissiveIntensity = child.userData.originalEmissiveIntensity || 0.5;
+        }
+      });
+    }
 
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
