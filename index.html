@@ -22,18 +22,14 @@
       width: 100vw;
     }
 
-    /* ============================================
-       GLOBAL DOT GRID BACKGROUND
-       ============================================ */
+    /* Dot grid background */
     body {
       background-color: #151517;
       background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
       background-size: 30px 30px;
     }
 
-    /* ============================================
-       HEADER / BRANDING
-       ============================================ */
+    /* Header - centered logo */
     #header {
       position: fixed;
       top: 0;
@@ -59,9 +55,7 @@
       text-transform: lowercase;
     }
 
-    /* ============================================
-       MAIN LAYOUT CONTAINER
-       ============================================ */
+    /* Main two-column layout, shifted right */
     #main-container {
       position: fixed;
       top: 84px;
@@ -78,28 +72,23 @@
       justify-content: center;
     }
 
-    /* ============================================
-       LEFT SIDE - BEVELED 3D BOX
-       ============================================ */
+    /* Left side - beveled 3D box (65% width) */
     #bevel-container {
       flex: 0 0 65%;
       max-width: 65%;
-      
       background: linear-gradient(145deg, #1a1a1e, #121215);
       border-radius: 20px;
-      
       box-shadow: 
         8px 8px 20px rgba(0, 0, 0, 0.5),
         -4px -4px 15px rgba(0, 0, 0, 0.3),
         inset 1px 1px 2px rgba(255, 255, 255, 0.05),
         inset -1px -1px 2px rgba(0, 0, 0, 0.3);
-      
       border: 1px solid rgba(255, 255, 255, 0.03);
-      
       position: relative;
       overflow: hidden;
     }
 
+    /* Inner canvas area (4px inset for bevel effect) */
     #bevel-inner {
       position: absolute;
       inset: 4px;
@@ -119,9 +108,7 @@
       cursor: grabbing;
     }
 
-    /* ============================================
-       HOVER TOOLTIP
-       ============================================ */
+    /* Hover tooltip popup */
     #hover-tooltip {
       position: fixed;
       pointer-events: none;
@@ -140,9 +127,7 @@
       opacity: 0;
       transform: translate(-50%, -100%) translateY(-12px);
       transition: opacity 0.2s ease, transform 0.2s ease;
-      box-shadow: 
-        0 4px 16px rgba(0, 0, 0, 0.4),
-        0 0 8px rgba(59, 130, 246, 0.1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 8px rgba(59, 130, 246, 0.1);
     }
 
     #hover-tooltip.visible {
@@ -163,25 +148,19 @@
       border-top: 6px solid rgba(59, 130, 246, 0.25);
     }
 
-    /* ============================================
-       RIGHT SIDE - INFO PANEL
-       ============================================ */
+    /* Right side - info panel (35% width) */
     #info-panel {
       flex: 1;
       min-width: 280px;
       max-width: 420px;
-      
       background: linear-gradient(145deg, #1a1a1e, #121215);
       border-radius: 20px;
-      
       box-shadow: 
         8px 8px 20px rgba(0, 0, 0, 0.5),
         -4px -4px 15px rgba(0, 0, 0, 0.3),
         inset 1px 1px 2px rgba(255, 255, 255, 0.05),
         inset -1px -1px 2px rgba(0, 0, 0, 0.3);
-      
       border: 1px solid rgba(255, 255, 255, 0.03);
-      
       padding: 24px;
       overflow-y: auto;
       display: flex;
@@ -390,6 +369,7 @@
       display: none;
     }
 
+    /* Loading screen overlay */
     #loader {
       position: fixed;
       inset: 0;
@@ -463,7 +443,6 @@
     <div id="loader-text">Loading 3D Model...</div>
   </div>
 
-  <!-- Hover Tooltip -->
   <div id="hover-tooltip"></div>
 
   <div id="header">
@@ -554,6 +533,7 @@
     const closeBtn = document.getElementById('close-btn');
     const hoverTooltip = document.getElementById('hover-tooltip');
 
+    // Injury data - keys must match your model's mesh/group names
     const INJURY_DATA = {
       "UpperLeg": {
         displayName: "Upper Leg (Quadriceps & Hamstrings)",
@@ -603,7 +583,7 @@
       }
     };
 
-    // Display name mapping for hover tooltip
+    // Display names for the hover tooltip
     const DISPLAY_NAMES = {
       "Hip": "Hip & Glutes",
       "UpperLeg": "Upper Leg",
@@ -612,8 +592,9 @@
       "Ankle": "Ankle & Foot"
     };
 
+    // Three.js scene setup
     const scene = new THREE.Scene();
-    scene.background = null;
+    scene.background = null; // Transparent
 
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.set(0, 1.5, 5);
@@ -628,6 +609,7 @@
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
 
+    // OrbitControls - left=rotate, right=pan, scroll=zoom, middle=disabled
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
@@ -643,6 +625,7 @@
     controls.panSpeed = 0.8;
     controls.update();
 
+    // Multi-light setup
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight);
 
@@ -661,30 +644,29 @@
     const hemiLight = new THREE.HemisphereLight(0x1e293b, 0x0f172a, 0.5);
     scene.add(hemiLight);
 
+    // Load 3D model
     let loadedModel = null;
     const modelLoader = new GLTFLoader();
 
     modelLoader.load(
       './leg_model.glb',
       (gltf) => {
-        console.log('Model loaded successfully');
         loadedModel = gltf.scene;
         
+        // Center and scale model
         const boundingBox = new THREE.Box3().setFromObject(loadedModel);
         const center = boundingBox.getCenter(new THREE.Vector3());
         const size = boundingBox.getSize(new THREE.Vector3());
-        
         loadedModel.position.sub(center);
         loadedModel.position.y += size.y / 2;
         
         const maxDimension = Math.max(size.x, size.y, size.z);
-        const targetSize = 3;
-        const scale = targetSize / maxDimension;
+        const scale = 3 / maxDimension;
         loadedModel.scale.setScalar(scale);
         
         scene.add(loadedModel);
         
-        // Store original material data for hover effects
+        // Store original material data for hover
         loadedModel.traverse((child) => {
           if (child.isMesh && child.material) {
             child.userData.originalEmissive = child.material.emissive ? child.material.emissive.getHex() : 0x000000;
@@ -692,18 +674,17 @@
           }
         });
         
-        const cameraDistance = targetSize * 1.8;
+        // Position camera with higher view angle
+        const cameraDistance = 3 * 1.8;
         camera.position.set(cameraDistance * 0.5, cameraDistance * 0.65, cameraDistance * 0.9);
-        controls.target.set(0, targetSize / 3.5, 0);
+        controls.target.set(0, 3 / 3.5, 0);
         controls.update();
         
         loader.classList.add('hidden');
         
-        console.log('=== MESH NAMES FROM YOUR MODEL ===');
+        console.log('=== MESH NAMES ===');
         loadedModel.traverse((child) => {
-          if (child.isMesh) {
-            console.log(`"${child.name || 'unnamed'}" → Add to INJURY_DATA`);
-          }
+          if (child.isMesh) console.log(`"${child.name || 'unnamed'}"`);
         });
       },
       (xhr) => {
@@ -716,14 +697,12 @@
         console.error('Error loading model:', error);
         document.getElementById('loader-text').innerHTML = `
           <strong style="color: #ef4444;">Failed to load model</strong><br>
-          <span style="font-size: 0.75rem; color: #5a5a6a;">
-            Make sure leg_model.glb is in the same folder.
-          </span>
+          <span style="font-size: 0.75rem; color: #5a5a6a;">Make sure leg_model.glb is in the same folder.</span>
         `;
       }
     );
 
-    // Middle mouse button panning state
+    // Middle mouse panning state
     let isScrollPressed = false;
     let scrollPressStartY = 0;
     const SCROLL_PAN_SENSITIVITY = 0.005;
@@ -737,9 +716,7 @@
     });
 
     canvas.addEventListener('mouseup', (event) => {
-      if (event.button === 1) {
-        isScrollPressed = false;
-      }
+      if (event.button === 1) isScrollPressed = false;
     });
 
     canvas.addEventListener('mouseleave', () => {
@@ -748,6 +725,7 @@
       resetAllHoverGlow();
     });
 
+    // Middle mouse pan handler
     canvas.addEventListener('mousemove', (event) => {
       if (isScrollPressed && loadedModel) {
         const deltaY = scrollPressStartY - event.clientY;
@@ -755,22 +733,19 @@
         
         const panDirection = new THREE.Vector3();
         camera.getWorldDirection(panDirection);
-        
         const right = new THREE.Vector3();
         right.crossVectors(panDirection, new THREE.Vector3(0, 1, 0)).normalize();
-        
         const up = new THREE.Vector3();
         up.crossVectors(right, panDirection).normalize();
         
         const moveVec = up.multiplyScalar(panAmount);
-        
         loadedModel.position.add(moveVec);
         controls.target.add(moveVec);
-        
         scrollPressStartY = event.clientY;
       }
     });
 
+    // Raycaster for click/hover detection
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
@@ -789,18 +764,15 @@
 
     canvas.addEventListener('mouseup', (event) => {
       if (event.button !== 0 || !loadedModel) return;
-
       const deltaX = Math.abs(event.clientX - mouseDownPosition.x);
       const deltaY = Math.abs(event.clientY - mouseDownPosition.y);
       const distanceMoved = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
       const timeHeld = Date.now() - mouseDownTime;
-
-      if (distanceMoved > DRAG_THRESHOLD) return;
-      if (timeHeld > HOLD_THRESHOLD) return;
-
+      if (distanceMoved > DRAG_THRESHOLD || timeHeld > HOLD_THRESHOLD) return;
       handleClick(event);
     });
 
+    // Handle click on 3D model
     function handleClick(event) {
       const rect = canvas.getBoundingClientRect();
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -811,7 +783,6 @@
 
       if (intersects.length > 0) {
         const clickedMesh = intersects[0].object;
-        
         highlightMesh(clickedMesh);
 
         let injuryInfo = null;
@@ -834,13 +805,10 @@
         if (injuryInfo) {
           showInjuryPanel(injuryInfo, matchedKey);
         } else {
-          console.log(`Mesh clicked: "${clickedMesh.name}" - Add to INJURY_DATA`);
           showInjuryPanel({
             displayName: clickedMesh.name || "Unknown Region",
-            description: "Injury data not yet mapped. Check console for mesh name.",
-            injuries: [
-              { name: "Data Pending", detail: "Add this mesh name to INJURY_DATA.", severity: 0 }
-            ]
+            description: "Injury data not yet mapped.",
+            injuries: [{ name: "Data Pending", detail: "Check console for mesh name.", severity: 0 }]
           }, clickedMesh.name);
         }
       } else {
@@ -848,81 +816,17 @@
       }
     }
 
-    // Track previously hovered group for tooltip
-    let currentHoverGroup = null;
-
-    canvas.addEventListener('mousemove', (event) => {
-      if (isScrollPressed) return;
-      if (!loadedModel) return;
-
-      const rect = canvas.getBoundingClientRect();
-      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObject(loadedModel, true);
-
-      // Reset all meshes to original state
-      loadedModel.traverse((child) => {
-        if (child.isMesh && child.material) {
-          child.material.emissive.setHex(child.userData.originalEmissive || 0x000000);
-          child.material.emissiveIntensity = child.userData.originalEmissiveIntensity || 0.5;
-        }
-      });
-
-      if (intersects.length > 0) {
-        const hoveredMesh = intersects[0].object;
-        
-        // Find the parent group name
-        const regionName = getRegionName(hoveredMesh);
-        
-        if (regionName) {
-          // Apply strong hover glow to the hovered mesh
-          if (hoveredMesh.material) {
-            hoveredMesh.material.emissive.setHex(0x3b82f6);
-            hoveredMesh.material.emissiveIntensity = 0.8;
-          }
-
-          // Also highlight siblings in the same group
-          const parentGroup = hoveredMesh.parent;
-          if (parentGroup && parentGroup.isGroup) {
-            parentGroup.traverse((child) => {
-              if (child.isMesh && child !== hoveredMesh && child.material) {
-                child.material.emissive.setHex(0x1a3a5a);
-                child.material.emissiveIntensity = 0.3;
-              }
-            });
-          }
-
-          // Show tooltip
-          if (regionName !== currentHoverGroup) {
-            currentHoverGroup = regionName;
-            const displayName = DISPLAY_NAMES[regionName] || regionName;
-            showTooltip(displayName, event.clientX, event.clientY);
-          } else {
-            updateTooltipPosition(event.clientX, event.clientY);
-          }
-        }
-
-        canvas.style.cursor = 'pointer';
-      } else {
-        canvas.style.cursor = 'grab';
-        hideTooltip();
-        currentHoverGroup = null;
-      }
-    });
-
+    // Find parent group name matching INJURY_DATA
     function getRegionName(mesh) {
       let current = mesh;
       while (current) {
-        if (current.name && INJURY_DATA[current.name]) {
-          return current.name;
-        }
+        if (current.name && INJURY_DATA[current.name]) return current.name;
         current = current.parent;
       }
       return null;
     }
 
+    // Tooltip functions
     function showTooltip(text, x, y) {
       hoverTooltip.textContent = text;
       hoverTooltip.classList.add('visible');
@@ -949,11 +853,69 @@
       });
     }
 
+    // Hover detection and glow
+    let currentHoverGroup = null;
+
+    canvas.addEventListener('mousemove', (event) => {
+      if (isScrollPressed || !loadedModel) return;
+
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(loadedModel, true);
+
+      // Reset all meshes
+      loadedModel.traverse((child) => {
+        if (child.isMesh && child.material) {
+          child.material.emissive.setHex(child.userData.originalEmissive || 0x000000);
+          child.material.emissiveIntensity = child.userData.originalEmissiveIntensity || 0.5;
+        }
+      });
+
+      if (intersects.length > 0) {
+        const hoveredMesh = intersects[0].object;
+        const regionName = getRegionName(hoveredMesh);
+        
+        if (regionName) {
+          // Strong glow on hovered mesh
+          if (hoveredMesh.material) {
+            hoveredMesh.material.emissive.setHex(0x3b82f6);
+            hoveredMesh.material.emissiveIntensity = 0.8;
+          }
+          // Subtle glow on sibling meshes in same group
+          const parentGroup = hoveredMesh.parent;
+          if (parentGroup && parentGroup.isGroup) {
+            parentGroup.traverse((child) => {
+              if (child.isMesh && child !== hoveredMesh && child.material) {
+                child.material.emissive.setHex(0x1a3a5a);
+                child.material.emissiveIntensity = 0.3;
+              }
+            });
+          }
+          // Show tooltip
+          if (regionName !== currentHoverGroup) {
+            currentHoverGroup = regionName;
+            showTooltip(DISPLAY_NAMES[regionName] || regionName, event.clientX, event.clientY);
+          } else {
+            updateTooltipPosition(event.clientX, event.clientY);
+          }
+        }
+        canvas.style.cursor = 'pointer';
+      } else {
+        canvas.style.cursor = 'grab';
+        hideTooltip();
+        currentHoverGroup = null;
+      }
+    });
+
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       showDirections();
     });
 
+    // Resize handler
     const resizeObserver = new ResizeObserver(() => {
       const width = bevelInner.clientWidth;
       const height = bevelInner.clientHeight;
@@ -963,6 +925,7 @@
     });
     resizeObserver.observe(bevelInner);
 
+    // Animation loop
     function animate() {
       requestAnimationFrame(animate);
       controls.update();
@@ -970,34 +933,25 @@
     }
     animate();
 
+    // Show injury panel
     function showInjuryPanel(info, key) {
       directionsPanel.style.display = 'none';
       injuryContent.style.display = 'block';
-
       panelTitle.textContent = info.displayName;
       partTag.textContent = key;
       partDesc.textContent = info.description;
-
       injuriesList.innerHTML = '';
-
       info.injuries.forEach(injury => {
         const card = document.createElement('div');
         card.className = 'injury-card';
-        
         let severityHTML = '<div class="severity">';
         for (let i = 1; i <= 3; i++) {
           const isActive = i <= injury.severity;
           const isHigh = i === 3 && injury.severity === 3;
           severityHTML += `<div class="severity-dot ${isActive ? 'active' : ''} ${isHigh ? 'sev-high' : ''}"></div>`;
         }
-        severityHTML += '</div>';
-        severityHTML += '<span class="severity-label">Severity</span>';
-
-        card.innerHTML = `
-          <div class="injury-name">${injury.name}</div>
-          <div class="injury-detail">${injury.detail}</div>
-          ${severityHTML}
-        `;
+        severityHTML += '</div><span class="severity-label">Severity</span>';
+        card.innerHTML = `<div class="injury-name">${injury.name}</div><div class="injury-detail">${injury.detail}</div>${severityHTML}`;
         injuriesList.appendChild(card);
       });
     }
@@ -1009,18 +963,12 @@
 
     function highlightMesh(mesh) {
       if (!mesh.material) return;
-      
       const originalEmissive = mesh.material.emissive ? mesh.material.emissive.getHex() : 0x000000;
       mesh.material.emissive.setHex(0x1e40af);
-      
       setTimeout(() => {
-        if (mesh.material && mesh.material.emissive) {
-          mesh.material.emissive.setHex(originalEmissive);
-        }
+        if (mesh.material && mesh.material.emissive) mesh.material.emissive.setHex(originalEmissive);
       }, 300);
     }
-
-    console.log('%c AROBICMD Leg Explorer Loaded ', 'background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
   </script>
 
 </body>
