@@ -24,8 +24,7 @@
 
     /* ============================================
        GLOBAL DOT GRID BACKGROUND
-       Applied directly to the body so it covers
-       the ENTIRE page including behind all UI elements.
+       Applied to body so it covers everything
        ============================================ */
     body {
       background-color: #151517;
@@ -35,7 +34,7 @@
 
     /* ============================================
        HEADER / BRANDING
-       Semi-transparent so the dot grid shows through
+       Centered logo only, no subtitle
        ============================================ */
     #header {
       position: fixed;
@@ -43,12 +42,9 @@
       left: 0;
       right: 0;
       height: 64px;
-      
-      /* Transparent background - dot grid shows through */
       background: rgba(21, 21, 23, 0.6);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       display: flex;
       align-items: center;
@@ -69,19 +65,9 @@
       color: #3b82f6;
     }
 
-    #header .subtitle {
-      position: absolute;
-      right: 24px;
-      font-size: 0.72rem;
-      color: #4a4a5a;
-      font-weight: 400;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
     /* ============================================
        MAIN LAYOUT CONTAINER
-       Transparent so dot grid shows through
+       Two-column layout: 2/3 left + 1/3 right
        ============================================ */
     #main-container {
       position: fixed;
@@ -92,91 +78,118 @@
       display: flex;
       height: calc(100vh - 64px);
       z-index: 1;
+      gap: 20px;
+      padding: 20px;
     }
 
     /* ============================================
-       3D CANVAS CONTAINER
-       Transparent background - dot grid visible behind
+       LEFT SIDE - BEVELED 3D BOX
+       Takes up approximately 2/3 of the screen.
+       Uses layered box-shadows to create a subtle
+       beveled/raised effect with depth.
        ============================================ */
-    #canvas-container {
-      flex: 1;
+    #bevel-container {
+      flex: 0 0 65%; /* 65% width, don't grow, don't shrink */
+      max-width: 65%;
+      
+      /* 
+        Beveled box effect using multiple layered shadows:
+        - Outer dark shadow for depth
+        - Inner light highlight for raised edge
+        - Inner dark shadow for recessed edge
+      */
+      background: linear-gradient(145deg, #1a1a1e, #121215);
+      border-radius: 20px;
+      
+      box-shadow: 
+        /* Outer bottom-right shadow (dark) */
+        8px 8px 20px rgba(0, 0, 0, 0.5),
+        /* Outer top-left shadow (darker) */
+        -4px -4px 15px rgba(0, 0, 0, 0.3),
+        /* Inner top-left highlight (light) */
+        inset 1px 1px 2px rgba(255, 255, 255, 0.05),
+        /* Inner bottom-right edge (dark) */
+        inset -1px -1px 2px rgba(0, 0, 0, 0.3);
+      
+      /* Subtle border for extra definition */
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      
+      /* Inner container for the canvas */
       position: relative;
-      /* No solid background - transparent */
+      overflow: hidden;
     }
 
-    #canvas-container canvas {
+    /* Inner padding inside the beveled box */
+    #bevel-inner {
+      position: absolute;
+      inset: 4px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(10, 10, 12, 0.6);
+    }
+
+    /* The 3D canvas fills the inner area */
+    #bevel-inner canvas {
       display: block;
       width: 100%;
       height: 100%;
       cursor: grab;
     }
 
-    #canvas-container canvas:active {
+    #bevel-inner canvas:active {
       cursor: grabbing;
     }
 
     /* ============================================
-       INSTRUCTION OVERLAY
-       Semi-transparent glass effect
-       ============================================ */
-    #instruction-overlay {
-      position: absolute;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      
-      background: rgba(21, 21, 23, 0.65);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      
-      padding: 10px 18px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      font-size: 0.8rem;
-      color: #6a6a7a;
-      text-align: center;
-      pointer-events: none;
-      transition: opacity 0.5s ease;
-      z-index: 10;
-    }
-
-    #instruction-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* ============================================
-       RIGHT INFO PANEL
-       Semi-transparent dark glass - dot grid visible behind
+       RIGHT SIDE - INFO PANEL
+       Takes up approximately 1/3 of the screen.
+       Same beveled style for visual consistency.
        ============================================ */
     #info-panel {
-      width: 400px;
+      flex: 1; /* Takes remaining space (~35%) */
+      min-width: 280px;
+      max-width: 420px;
       
-      /* Transparent dark glass */
-      background: rgba(21, 21, 23, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: linear-gradient(145deg, #1a1a1e, #121215);
+      border-radius: 20px;
       
-      border-left: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 
+        8px 8px 20px rgba(0, 0, 0, 0.5),
+        -4px -4px 15px rgba(0, 0, 0, 0.3),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.05),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.3);
+      
+      border: 1px solid rgba(255, 255, 255, 0.03);
       
       padding: 24px;
       overflow-y: auto;
-      transform: translateX(100%);
-      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       flex-direction: column;
-      z-index: 50;
     }
 
-    #info-panel.visible {
-      transform: translateX(0);
+    /* Custom scrollbar for info panel */
+    #info-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    #info-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #info-panel::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+    }
+    #info-panel::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.12);
     }
 
+    /* ============================================
+       PANEL HEADER
+       ============================================ */
     #panel-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       padding-bottom: 16px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
@@ -207,6 +220,9 @@
       color: #b0b0b8;
     }
 
+    /* ============================================
+       PART TAG & DESCRIPTION
+       ============================================ */
     #part-tag {
       display: inline-block;
       padding: 4px 10px;
@@ -236,6 +252,9 @@
       margin-bottom: 12px;
     }
 
+    /* ============================================
+       INJURY CARDS
+       ============================================ */
     .injury-card {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.04);
@@ -288,47 +307,82 @@
     .severity-dot.active { background: #3b82f6; }
     .severity-dot.active.sev-high { background: #ef4444; }
 
-    #panel-placeholder {
+    /* ============================================
+       DIRECTIONS PANEL (shown when no part selected)
+       ============================================ */
+    #directions-panel {
       display: flex;
       flex-direction: column;
+      height: 100%;
+    }
+
+    #directions-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #e8e8ec;
+      margin-bottom: 20px;
+    }
+
+    .direction-group {
+      margin-bottom: 24px;
+    }
+
+    .direction-group-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #3b82f6;
+      margin-bottom: 10px;
+    }
+
+    .direction-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .direction-key {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      height: 100%;
-      color: #2a2a34;
-      text-align: center;
-      padding: 40px 20px;
+      min-width: 28px;
+      height: 24px;
+      padding: 0 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 5px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #b0b0b8;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    
-    #panel-placeholder svg {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 16px;
-      opacity: 0.25;
-      color: #4a4a5a;
-    }
-    
-    #panel-placeholder p {
+
+    .direction-text {
       font-size: 0.82rem;
-      line-height: 1.6;
+      color: #7a7a8a;
+      line-height: 1.5;
+      padding-top: 2px;
+    }
+
+    .direction-note {
+      font-size: 0.75rem;
       color: #4a4a5a;
+      line-height: 1.5;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      margin-top: 16px;
     }
 
     /* ============================================
-       SCROLL BAR STYLING (for info panel)
-       Custom dark scrollbar
+       INJURY CONTENT (hidden until selection)
        ============================================ */
-    #info-panel::-webkit-scrollbar {
-      width: 6px;
-    }
-    #info-panel::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    #info-panel::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-    }
-    #info-panel::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.15);
+    #injury-content {
+      display: none;
     }
 
     /* ============================================
@@ -374,16 +428,19 @@
        RESPONSIVE ADJUSTMENTS
        ============================================ */
     @media (max-width: 900px) {
-      #info-panel {
-        width: 100%;
-        position: absolute;
-        top: 0;
-        right: 0;
-        height: 100%;
-        z-index: 50;
+      #main-container {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px;
       }
-      #header .subtitle {
-        display: none;
+      #bevel-container {
+        flex: 0 0 55%;
+        max-width: 100%;
+      }
+      #info-panel {
+        flex: 1;
+        min-width: auto;
+        max-width: 100%;
       }
     }
   </style>
@@ -401,57 +458,101 @@
 
 <body>
 
-  <!-- 
-    BACKGROUND: Applied directly to body via CSS
-    The dot grid pattern covers the entire page
-    so all UI elements sit on top of it
-  -->
-
   <!-- LOADING SCREEN -->
   <div id="loader">
     <div class="spinner"></div>
     <div id="loader-text">Loading 3D Model...</div>
   </div>
 
-  <!-- HEADER with centered logo -->
+  <!-- HEADER - Centered logo only, no subtitle -->
   <div id="header">
     <h1>AROBIC<span class="brand-accent">MD</span></h1>
-    <span class="subtitle">Interactive Leg Injury Explorer</span>
   </div>
 
   <!-- MAIN APP CONTAINER -->
   <div id="main-container">
     
-    <!-- 3D VIEWPORT -->
-    <div id="canvas-container">
-      <canvas id="webgl-canvas"></canvas>
-      
-      <div id="instruction-overlay">
-        Click any part of the leg to explore common injuries
+    <!-- 
+      LEFT SIDE: BEVELED BOX containing the 3D model
+      Takes up ~2/3 of the screen width
+    -->
+    <div id="bevel-container">
+      <div id="bevel-inner">
+        <canvas id="webgl-canvas"></canvas>
       </div>
     </div>
 
-    <!-- RIGHT INFO PANEL -->
+    <!-- 
+      RIGHT SIDE: INFO PANEL
+      Takes up ~1/3 of the screen width
+      Shows directions when idle, injury info when a part is selected
+    -->
     <div id="info-panel">
-      <div id="panel-placeholder">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 8v4l2 2"/>
-        </svg>
-        <p>Select a part of the leg to view<br>common injuries & strains</p>
+      
+      <!-- 
+        DIRECTIONS PANEL
+        Shown by default when no body part is selected.
+        Contains navigation instructions for the 3D model.
+      -->
+      <div id="directions-panel">
+        <div id="directions-title">How to Use</div>
+        
+        <!-- 3D Navigation Controls -->
+        <div class="direction-group">
+          <div class="direction-group-title">3D Model Navigation</div>
+          <div class="direction-item">
+            <span class="direction-key">Left Click + Drag</span>
+            <span class="direction-text">Rotate the 3D model to view from any angle</span>
+          </div>
+          <div class="direction-item">
+            <span class="direction-key">Right Click + Drag</span>
+            <span class="direction-text">Pan the camera left, right, up, or down</span>
+          </div>
+          <div class="direction-item">
+            <span class="direction-key">Scroll Wheel</span>
+            <span class="direction-text">Move the model up and down</span>
+          </div>
+          <div class="direction-item">
+            <span class="direction-key">Ctrl + Scroll</span>
+            <span class="direction-text">Zoom in and out</span>
+          </div>
+        </div>
+
+        <!-- Injury Exploration Controls -->
+        <div class="direction-group">
+          <div class="direction-group-title">Exploring Injuries</div>
+          <div class="direction-item">
+            <span class="direction-key">Click</span>
+            <span class="direction-text">Click on any part of the 3D leg model to view common injuries and strains for that area</span>
+          </div>
+          <div class="direction-item">
+            <span class="direction-key">✕</span>
+            <span class="direction-text">Click the close button to return to this directions panel</span>
+          </div>
+        </div>
+
+        <!-- Pro Tip -->
+        <div class="direction-note">
+          💡 <strong>Tip:</strong> The model parts will highlight when you hover over them. Look for the subtle glow to find clickable regions.
+        </div>
       </div>
 
-      <div id="panel-content" style="display: none;">
+      <!-- 
+        INJURY CONTENT PANEL
+        Hidden by default. Shown when a body part is clicked.
+        Dynamically populated with injury data.
+      -->
+      <div id="injury-content">
         <div id="panel-header">
           <div id="panel-title">Select a Region</div>
-          <button id="close-btn" title="Close panel">✕</button>
+          <button id="close-btn" title="Return to directions">✕</button>
         </div>
         <div id="part-tag">Region</div>
         <div id="part-description">Description will appear here.</div>
-        
         <div id="injuries-heading">Common Injuries</div>
         <div id="injuries-list"></div>
       </div>
+
     </div>
 
   </div>
@@ -468,13 +569,13 @@
     /* ============================================
        DOM REFERENCES
        ============================================ */
-    const container = document.getElementById('canvas-container');
+    const bevelContainer = document.getElementById('bevel-container');
+    const bevelInner = document.getElementById('bevel-inner');
     const canvas = document.getElementById('webgl-canvas');
     const loader = document.getElementById('loader');
-    const instructionOverlay = document.getElementById('instruction-overlay');
     const infoPanel = document.getElementById('info-panel');
-    const panelPlaceholder = document.getElementById('panel-placeholder');
-    const panelContent = document.getElementById('panel-content');
+    const directionsPanel = document.getElementById('directions-panel');
+    const injuryContent = document.getElementById('injury-content');
     const panelTitle = document.getElementById('panel-title');
     const partTag = document.getElementById('part-tag');
     const partDesc = document.getElementById('part-description');
@@ -537,25 +638,22 @@
     /* ============================================
        THREE.JS SCENE SETUP
        Scene background is transparent so the CSS
-       dot grid shows through the canvas
+       dot grid background shows through the canvas
        ============================================ */
     
-    // Create scene - set background to null/transparent
-    // so the CSS background behind the canvas is visible
     const scene = new THREE.Scene();
     scene.background = null; // Transparent - CSS dot grid shows through
 
     // Camera setup
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100); // Aspect ratio set dynamically
     camera.position.set(0, 1.5, 5);
 
     // Renderer with alpha enabled for transparency
     const renderer = new THREE.WebGLRenderer({ 
       canvas: canvas,
       antialias: true,
-      alpha: true // Enable transparency so CSS background shows through
+      alpha: true // Enable transparency
     });
-    renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -580,7 +678,6 @@
 
     const mainLight = new THREE.DirectionalLight(0xffffff, 1.8);
     mainLight.position.set(3, 5, 4);
-    mainLight.castShadow = true;
     scene.add(mainLight);
 
     const fillLight = new THREE.DirectionalLight(0xc8d6e5, 1.0);
@@ -627,7 +724,6 @@
         // Store original material data for hover effects
         loadedModel.traverse((child) => {
           if (child.isMesh) {
-            child.userData.originalColor = child.material ? child.material.color.clone() : null;
             child.userData.originalEmissive = child.material && child.material.emissive ? child.material.emissive.getHex() : 0x000000;
           }
         });
@@ -676,9 +772,6 @@
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    let hasInteracted = false;
-    let isPanelOpen = false;
-
     // Track mouse state for distinguishing clicks from drags
     let mouseDownPosition = { x: 0, y: 0 };
     let mouseDownTime = 0;
@@ -720,11 +813,6 @@
       if (intersects.length > 0) {
         const clickedMesh = intersects[0].object;
         
-        if (!hasInteracted) {
-          instructionOverlay.classList.add('hidden');
-          hasInteracted = true;
-        }
-
         highlightMesh(clickedMesh);
 
         let injuryInfo = null;
@@ -746,7 +834,6 @@
 
         if (injuryInfo) {
           showInjuryPanel(injuryInfo, matchedKey);
-          isPanelOpen = true;
         } else {
           console.log(`Mesh clicked: "${clickedMesh.name}" - Add to INJURY_DATA`);
           showInjuryPanel({
@@ -756,12 +843,10 @@
               { name: "Data Pending", detail: "Add this mesh name to INJURY_DATA.", severity: 0 }
             ]
           }, clickedMesh.name);
-          isPanelOpen = true;
         }
       } else {
-        // Clicked empty space - close panel
-        closeInfoPanel();
-        isPanelOpen = false;
+        // Clicked empty space - return to directions
+        showDirections();
       }
     }
 
@@ -795,57 +880,41 @@
 
     /* ============================================
        SCROLL HANDLER - MOVE MODEL UP/DOWN
-       
-       OVERRIDE: Instead of zooming with the mouse wheel,
-       scrolling moves the entire 3D model vertically up
-       and down. This lets users pan through the leg
-       from hip to foot smoothly.
-       
-       Zoom is still available via:
-       - Ctrl+Scroll (or Cmd+Scroll on Mac)
-       - Pinch gesture on trackpad/touch
+       Scroll wheel moves the model vertically
+       Ctrl+Scroll still allows zooming
        ============================================ */
     canvas.addEventListener('wheel', (event) => {
-      // Check if Ctrl/Cmd is held - if so, allow normal zoom
-      if (event.ctrlKey || event.metaKey) {
-        return; // Let default OrbitControls zoom handle this
-      }
-
-      // Prevent default zoom behavior
+      if (event.ctrlKey || event.metaKey) return;
       event.preventDefault();
 
       if (!loadedModel) return;
 
-      // Move model up or down based on scroll direction
-      // Negative deltaY = scrolling up = move model up
-      // Positive deltaY = scrolling down = move model down
-      const scrollSpeed = 0.003; // Adjust sensitivity
+      const scrollSpeed = 0.003;
       loadedModel.position.y += event.deltaY * scrollSpeed;
-
-      // Also move the controls target so rotation stays centered
       controls.target.y += event.deltaY * scrollSpeed;
-    }, { passive: false }); // passive: false allows preventDefault()
+    }, { passive: false });
 
     /* ============================================
-       CLOSE BUTTON HANDLER
+       CLOSE BUTTON - RETURN TO DIRECTIONS
        ============================================ */
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      closeInfoPanel();
-      isPanelOpen = false;
+      showDirections();
     });
 
     /* ============================================
        RESIZE HANDLER
+       Updates camera aspect ratio and renderer size
+       when the bevel container changes dimensions
        ============================================ */
     const resizeObserver = new ResizeObserver(() => {
-      const width = container.clientWidth;
-      const height = container.clientHeight;
+      const width = bevelInner.clientWidth;
+      const height = bevelInner.clientHeight;
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
     });
-    resizeObserver.observe(container);
+    resizeObserver.observe(bevelInner);
 
     /* ============================================
        ANIMATION LOOP
@@ -861,13 +930,25 @@
        UI HELPER FUNCTIONS
        ============================================ */
 
+    /**
+     * showInjuryPanel
+     * Hides the directions panel and shows injury data
+     * for the selected body part
+     */
     function showInjuryPanel(info, key) {
+      // Hide directions, show injury content
+      directionsPanel.style.display = 'none';
+      injuryContent.style.display = 'block';
+
+      // Update content
       panelTitle.textContent = info.displayName;
       partTag.textContent = key;
       partDesc.textContent = info.description;
 
+      // Clear previous injury cards
       injuriesList.innerHTML = '';
 
+      // Generate injury cards
       info.injuries.forEach(injury => {
         const card = document.createElement('div');
         card.className = 'injury-card';
@@ -888,20 +969,22 @@
         `;
         injuriesList.appendChild(card);
       });
-
-      panelPlaceholder.style.display = 'none';
-      panelContent.style.display = 'block';
-      infoPanel.classList.add('visible');
     }
 
-    function closeInfoPanel() {
-      infoPanel.classList.remove('visible');
-      setTimeout(() => {
-        panelContent.style.display = 'none';
-        panelPlaceholder.style.display = 'flex';
-      }, 300);
+    /**
+     * showDirections
+     * Hides injury content and shows the directions panel
+     * Called when user clicks X or clicks empty space
+     */
+    function showDirections() {
+      directionsPanel.style.display = 'flex';
+      injuryContent.style.display = 'none';
     }
 
+    /**
+     * highlightMesh
+     * Flash highlight effect on clicked mesh
+     */
     function highlightMesh(mesh) {
       if (!mesh.material) return;
       
