@@ -58,28 +58,29 @@
       font-weight: 800;
       letter-spacing: 4px;
       color: #ffffff;
-      text-transform: uppercase;
-    }
-
-    #header .brand-accent {
-      color: #3b82f6;
+      text-transform: lowercase;
     }
 
     /* ============================================
        MAIN LAYOUT CONTAINER
        Two-column layout: 2/3 left + 1/3 right
+       Shifted to the right and centered vertically
+       with increased top/bottom margins
        ============================================ */
     #main-container {
       position: fixed;
-      top: 64px;
+      top: 84px;      /* increased from 64px */
       left: 0;
       right: 0;
-      bottom: 0;
+      bottom: 40px;   /* increased from 0 */
       display: flex;
-      height: calc(100vh - 64px);
+      height: calc(100vh - 84px - 40px);
       z-index: 1;
       gap: 20px;
       padding: 20px;
+      padding-left: 8%;   /* shift right */
+      padding-right: 4%;  /* slight right padding */
+      justify-content: center;
     }
 
     /* ============================================
@@ -432,6 +433,8 @@
         flex-direction: column;
         gap: 12px;
         padding: 12px;
+        padding-left: 12px;
+        padding-right: 12px;
       }
       #bevel-container {
         flex: 0 0 55%;
@@ -466,7 +469,7 @@
 
   <!-- HEADER - Centered logo only, no subtitle -->
   <div id="header">
-    <h1>AROBIC<span class="brand-accent">MD</span></h1>
+    <h1>arobicmd</h1>
   </div>
 
   <!-- MAIN APP CONTAINER -->
@@ -545,7 +548,7 @@
       <div id="injury-content">
         <div id="panel-header">
           <div id="panel-title">Select a Region</div>
-          <button id="close-btn" title="Return to directions">✕</button>
+          <button id="close-btn" title="Return to directions"></button>
         </div>
         <div id="part-tag">Region</div>
         <div id="part-description">Description will appear here.</div>
