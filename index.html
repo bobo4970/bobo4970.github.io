@@ -69,17 +69,17 @@
        ============================================ */
     #main-container {
       position: fixed;
-      top: 84px;      /* increased from 64px */
+      top: 84px;
       left: 0;
       right: 0;
-      bottom: 40px;   /* increased from 0 */
+      bottom: 40px;
       display: flex;
       height: calc(100vh - 84px - 40px);
       z-index: 1;
       gap: 20px;
       padding: 20px;
-      padding-left: 8%;   /* shift right */
-      padding-right: 4%;  /* slight right padding */
+      padding-left: 8%;
+      padding-right: 4%;
       justify-content: center;
     }
 
@@ -90,37 +90,24 @@
        beveled/raised effect with depth.
        ============================================ */
     #bevel-container {
-      flex: 0 0 65%; /* 65% width, don't grow, don't shrink */
+      flex: 0 0 65%;
       max-width: 65%;
       
-      /* 
-        Beveled box effect using multiple layered shadows:
-        - Outer dark shadow for depth
-        - Inner light highlight for raised edge
-        - Inner dark shadow for recessed edge
-      */
       background: linear-gradient(145deg, #1a1a1e, #121215);
       border-radius: 20px;
       
       box-shadow: 
-        /* Outer bottom-right shadow (dark) */
         8px 8px 20px rgba(0, 0, 0, 0.5),
-        /* Outer top-left shadow (darker) */
         -4px -4px 15px rgba(0, 0, 0, 0.3),
-        /* Inner top-left highlight (light) */
         inset 1px 1px 2px rgba(255, 255, 255, 0.05),
-        /* Inner bottom-right edge (dark) */
         inset -1px -1px 2px rgba(0, 0, 0, 0.3);
       
-      /* Subtle border for extra definition */
       border: 1px solid rgba(255, 255, 255, 0.03);
       
-      /* Inner container for the canvas */
       position: relative;
       overflow: hidden;
     }
 
-    /* Inner padding inside the beveled box */
     #bevel-inner {
       position: absolute;
       inset: 4px;
@@ -129,7 +116,6 @@
       background: rgba(10, 10, 12, 0.6);
     }
 
-    /* The 3D canvas fills the inner area */
     #bevel-inner canvas {
       display: block;
       width: 100%;
@@ -147,7 +133,7 @@
        Same beveled style for visual consistency.
        ============================================ */
     #info-panel {
-      flex: 1; /* Takes remaining space (~35%) */
+      flex: 1;
       min-width: 280px;
       max-width: 420px;
       
@@ -168,7 +154,6 @@
       flex-direction: column;
     }
 
-    /* Custom scrollbar for info panel */
     #info-panel::-webkit-scrollbar {
       width: 6px;
     }
@@ -183,9 +168,6 @@
       background: rgba(255, 255, 255, 0.12);
     }
 
-    /* ============================================
-       PANEL HEADER
-       ============================================ */
     #panel-header {
       display: flex;
       justify-content: space-between;
@@ -221,9 +203,6 @@
       color: #b0b0b8;
     }
 
-    /* ============================================
-       PART TAG & DESCRIPTION
-       ============================================ */
     #part-tag {
       display: inline-block;
       padding: 4px 10px;
@@ -253,9 +232,6 @@
       margin-bottom: 12px;
     }
 
-    /* ============================================
-       INJURY CARDS
-       ============================================ */
     .injury-card {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.04);
@@ -308,9 +284,6 @@
     .severity-dot.active { background: #3b82f6; }
     .severity-dot.active.sev-high { background: #ef4444; }
 
-    /* ============================================
-       DIRECTIONS PANEL (shown when no part selected)
-       ============================================ */
     #directions-panel {
       display: flex;
       flex-direction: column;
@@ -379,16 +352,10 @@
       margin-top: 16px;
     }
 
-    /* ============================================
-       INJURY CONTENT (hidden until selection)
-       ============================================ */
     #injury-content {
       display: none;
     }
 
-    /* ============================================
-       LOADING SCREEN
-       ============================================ */
     #loader {
       position: fixed;
       inset: 0;
@@ -425,9 +392,6 @@
       color: #5a5a6a;
     }
 
-    /* ============================================
-       RESPONSIVE ADJUSTMENTS
-       ============================================ */
     @media (max-width: 900px) {
       #main-container {
         flex-direction: column;
@@ -448,7 +412,6 @@
     }
   </style>
   
-  <!-- THREE.JS IMPORT MAP -->
   <script type="importmap">
   {
     "imports": {
@@ -461,46 +424,28 @@
 
 <body>
 
-  <!-- LOADING SCREEN -->
   <div id="loader">
     <div class="spinner"></div>
     <div id="loader-text">Loading 3D Model...</div>
   </div>
 
-  <!-- HEADER - Centered logo only, no subtitle -->
   <div id="header">
     <h1>arobicmd</h1>
   </div>
 
-  <!-- MAIN APP CONTAINER -->
   <div id="main-container">
     
-    <!-- 
-      LEFT SIDE: BEVELED BOX containing the 3D model
-      Takes up ~2/3 of the screen width
-    -->
     <div id="bevel-container">
       <div id="bevel-inner">
         <canvas id="webgl-canvas"></canvas>
       </div>
     </div>
 
-    <!-- 
-      RIGHT SIDE: INFO PANEL
-      Takes up ~1/3 of the screen width
-      Shows directions when idle, injury info when a part is selected
-    -->
     <div id="info-panel">
       
-      <!-- 
-        DIRECTIONS PANEL
-        Shown by default when no body part is selected.
-        Contains navigation instructions for the 3D model.
-      -->
       <div id="directions-panel">
         <div id="directions-title">How to Use</div>
         
-        <!-- 3D Navigation Controls -->
         <div class="direction-group">
           <div class="direction-group-title">3D Model Navigation</div>
           <div class="direction-item">
@@ -513,15 +458,14 @@
           </div>
           <div class="direction-item">
             <span class="direction-key">Scroll Wheel</span>
-            <span class="direction-text">Move the model up and down</span>
+            <span class="direction-text">Zoom in and out</span>
           </div>
           <div class="direction-item">
-            <span class="direction-key">Ctrl + Scroll</span>
-            <span class="direction-text">Zoom in and out</span>
+            <span class="direction-key">Scroll Press + Drag</span>
+            <span class="direction-text">Pan the model up and down</span>
           </div>
         </div>
 
-        <!-- Injury Exploration Controls -->
         <div class="direction-group">
           <div class="direction-group-title">Exploring Injuries</div>
           <div class="direction-item">
@@ -534,17 +478,11 @@
           </div>
         </div>
 
-        <!-- Pro Tip -->
         <div class="direction-note">
           💡 <strong>Tip:</strong> The model parts will highlight when you hover over them. Look for the subtle glow to find clickable regions.
         </div>
       </div>
 
-      <!-- 
-        INJURY CONTENT PANEL
-        Hidden by default. Shown when a body part is clicked.
-        Dynamically populated with injury data.
-      -->
       <div id="injury-content">
         <div id="panel-header">
           <div id="panel-title">Select a Region</div>
@@ -560,18 +498,11 @@
 
   </div>
 
-  <!-- MAIN JAVASCRIPT MODULE -->
   <script type="module">
-    /* ============================================
-       IMPORT THREE.JS COMPONENTS
-       ============================================ */
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-    /* ============================================
-       DOM REFERENCES
-       ============================================ */
     const bevelContainer = document.getElementById('bevel-container');
     const bevelInner = document.getElementById('bevel-inner');
     const canvas = document.getElementById('webgl-canvas');
@@ -585,10 +516,6 @@
     const injuriesList = document.getElementById('injuries-list');
     const closeBtn = document.getElementById('close-btn');
 
-    /* ============================================
-       INJURY DATA MAPPING
-       Update keys to match your model's mesh names
-       ============================================ */
     const INJURY_DATA = {
       "UpperLeg": {
         displayName: "Upper Leg (Quadriceps & Hamstrings)",
@@ -638,44 +565,37 @@
       }
     };
 
-    /* ============================================
-       THREE.JS SCENE SETUP
-       Scene background is transparent so the CSS
-       dot grid background shows through the canvas
-       ============================================ */
-    
     const scene = new THREE.Scene();
-    scene.background = null; // Transparent - CSS dot grid shows through
+    scene.background = null;
 
-    // Camera setup
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100); // Aspect ratio set dynamically
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
     camera.position.set(0, 1.5, 5);
 
-    // Renderer with alpha enabled for transparency
     const renderer = new THREE.WebGLRenderer({ 
       canvas: canvas,
       antialias: true,
-      alpha: true // Enable transparency
+      alpha: true
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
 
-    // OrbitControls setup
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.minDistance = 2;
     controls.maxDistance = 12;
     controls.target.set(0, 1, 0);
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: 0,
+      RIGHT: THREE.MOUSE.PAN
+    };
+    controls.enablePan = true;
+    controls.panSpeed = 0.8;
     controls.update();
 
-    /* ============================================
-       LIGHTING SETUP
-       Multi-light studio setup for anatomical detail
-       ============================================ */
-    
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight);
 
@@ -694,22 +614,15 @@
     const hemiLight = new THREE.HemisphereLight(0x1e293b, 0x0f172a, 0.5);
     scene.add(hemiLight);
 
-    /* ============================================
-       LOADING THE 3D MODEL
-       ============================================ */
-    
     let loadedModel = null;
     const modelLoader = new GLTFLoader();
 
     modelLoader.load(
       './leg_model.glb',
-      
-      // Success callback
       (gltf) => {
         console.log('Model loaded successfully');
         loadedModel = gltf.scene;
         
-        // Auto-center and scale
         const boundingBox = new THREE.Box3().setFromObject(loadedModel);
         const center = boundingBox.getCenter(new THREE.Vector3());
         const size = boundingBox.getSize(new THREE.Vector3());
@@ -724,23 +637,19 @@
         
         scene.add(loadedModel);
         
-        // Store original material data for hover effects
         loadedModel.traverse((child) => {
           if (child.isMesh) {
             child.userData.originalEmissive = child.material && child.material.emissive ? child.material.emissive.getHex() : 0x000000;
           }
         });
         
-        // Frame camera
-        const cameraDistance = targetSize * 1.6;
-        camera.position.set(cameraDistance * 0.7, cameraDistance * 0.4, cameraDistance);
-        controls.target.set(0, targetSize / 4, 0);
+        const cameraDistance = targetSize * 1.8;
+        camera.position.set(cameraDistance * 0.5, cameraDistance * 0.65, cameraDistance * 0.9);
+        controls.target.set(0, targetSize / 3.5, 0);
         controls.update();
         
-        // Hide loading screen
         loader.classList.add('hidden');
         
-        // Log mesh names for mapping
         console.log('=== MESH NAMES FROM YOUR MODEL ===');
         loadedModel.traverse((child) => {
           if (child.isMesh) {
@@ -748,16 +657,12 @@
           }
         });
       },
-      
-      // Progress callback
       (xhr) => {
         if (xhr.total > 0) {
           const percent = Math.round((xhr.loaded / xhr.total) * 100);
           document.getElementById('loader-text').textContent = `Loading 3D Model... ${percent}%`;
         }
       },
-      
-      // Error callback
       (error) => {
         console.error('Error loading model:', error);
         document.getElementById('loader-text').innerHTML = `
@@ -769,42 +674,82 @@
       }
     );
 
-    /* ============================================
-       RAYCASTER & INTERACTION HANDLING
-       ============================================ */
+    // Middle mouse button panning state
+    let isScrollPressed = false;
+    let scrollPressStartY = 0;
+    const SCROLL_PAN_SENSITIVITY = 0.005;
+
+    canvas.addEventListener('mousedown', (event) => {
+      if (event.button === 1) {
+        isScrollPressed = true;
+        scrollPressStartY = event.clientY;
+        event.preventDefault();
+      }
+    });
+
+    canvas.addEventListener('mouseup', (event) => {
+      if (event.button === 1) {
+        isScrollPressed = false;
+      }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      isScrollPressed = false;
+    });
+
+    canvas.addEventListener('mousemove', (event) => {
+      if (isScrollPressed && loadedModel) {
+        const deltaY = scrollPressStartY - event.clientY;
+        const panAmount = deltaY * SCROLL_PAN_SENSITIVITY;
+        
+        const panDirection = new THREE.Vector3();
+        camera.getWorldDirection(panDirection);
+        
+        const right = new THREE.Vector3();
+        right.crossVectors(panDirection, new THREE.Vector3(0, 1, 0)).normalize();
+        
+        const up = new THREE.Vector3();
+        up.crossVectors(right, panDirection).normalize();
+        
+        const moveVec = up.multiplyScalar(panAmount);
+        
+        loadedModel.position.add(moveVec);
+        controls.target.add(moveVec);
+        
+        scrollPressStartY = event.clientY;
+      }
+    });
+
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    // Track mouse state for distinguishing clicks from drags
     let mouseDownPosition = { x: 0, y: 0 };
     let mouseDownTime = 0;
     const DRAG_THRESHOLD = 5;
     const HOLD_THRESHOLD = 400;
 
-    // Mouse down - record position
     canvas.addEventListener('mousedown', (event) => {
-      mouseDownPosition.x = event.clientX;
-      mouseDownPosition.y = event.clientY;
-      mouseDownTime = Date.now();
+      if (event.button === 0) {
+        mouseDownPosition.x = event.clientX;
+        mouseDownPosition.y = event.clientY;
+        mouseDownTime = Date.now();
+      }
     });
 
-    // Mouse up - detect click vs drag
     canvas.addEventListener('mouseup', (event) => {
-      if (!loadedModel) return;
+      if (event.button !== 0 || !loadedModel) return;
 
       const deltaX = Math.abs(event.clientX - mouseDownPosition.x);
       const deltaY = Math.abs(event.clientY - mouseDownPosition.y);
       const distanceMoved = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
       const timeHeld = Date.now() - mouseDownTime;
 
-      // If it was a drag, don't process as click
       if (distanceMoved > DRAG_THRESHOLD) return;
       if (timeHeld > HOLD_THRESHOLD) return;
 
       handleClick(event);
     });
 
-    // Process a valid click
     function handleClick(event) {
       const rect = canvas.getBoundingClientRect();
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -848,14 +793,12 @@
           }, clickedMesh.name);
         }
       } else {
-        // Clicked empty space - return to directions
         showDirections();
       }
     }
 
-    // Hover effects
     canvas.addEventListener('mousemove', (event) => {
-      if (!loadedModel) return;
+      if (!loadedModel || isScrollPressed) return;
 
       const rect = canvas.getBoundingClientRect();
       mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -881,35 +824,11 @@
       }
     });
 
-    /* ============================================
-       SCROLL HANDLER - MOVE MODEL UP/DOWN
-       Scroll wheel moves the model vertically
-       Ctrl+Scroll still allows zooming
-       ============================================ */
-    canvas.addEventListener('wheel', (event) => {
-      if (event.ctrlKey || event.metaKey) return;
-      event.preventDefault();
-
-      if (!loadedModel) return;
-
-      const scrollSpeed = 0.003;
-      loadedModel.position.y += event.deltaY * scrollSpeed;
-      controls.target.y += event.deltaY * scrollSpeed;
-    }, { passive: false });
-
-    /* ============================================
-       CLOSE BUTTON - RETURN TO DIRECTIONS
-       ============================================ */
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       showDirections();
     });
 
-    /* ============================================
-       RESIZE HANDLER
-       Updates camera aspect ratio and renderer size
-       when the bevel container changes dimensions
-       ============================================ */
     const resizeObserver = new ResizeObserver(() => {
       const width = bevelInner.clientWidth;
       const height = bevelInner.clientHeight;
@@ -919,9 +838,6 @@
     });
     resizeObserver.observe(bevelInner);
 
-    /* ============================================
-       ANIMATION LOOP
-       ============================================ */
     function animate() {
       requestAnimationFrame(animate);
       controls.update();
@@ -929,29 +845,16 @@
     }
     animate();
 
-    /* ============================================
-       UI HELPER FUNCTIONS
-       ============================================ */
-
-    /**
-     * showInjuryPanel
-     * Hides the directions panel and shows injury data
-     * for the selected body part
-     */
     function showInjuryPanel(info, key) {
-      // Hide directions, show injury content
       directionsPanel.style.display = 'none';
       injuryContent.style.display = 'block';
 
-      // Update content
       panelTitle.textContent = info.displayName;
       partTag.textContent = key;
       partDesc.textContent = info.description;
 
-      // Clear previous injury cards
       injuriesList.innerHTML = '';
 
-      // Generate injury cards
       info.injuries.forEach(injury => {
         const card = document.createElement('div');
         card.className = 'injury-card';
@@ -974,20 +877,11 @@
       });
     }
 
-    /**
-     * showDirections
-     * Hides injury content and shows the directions panel
-     * Called when user clicks X or clicks empty space
-     */
     function showDirections() {
       directionsPanel.style.display = 'flex';
       injuryContent.style.display = 'none';
     }
 
-    /**
-     * highlightMesh
-     * Flash highlight effect on clicked mesh
-     */
     function highlightMesh(mesh) {
       if (!mesh.material) return;
       
@@ -1001,21 +895,7 @@
       }, 300);
     }
 
-    /* ============================================
-       DEVELOPER DEBUG INFO
-       ============================================ */
     console.log('%c AROBICMD Leg Explorer Loaded ', 'background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;');
-    console.log('');
-    console.log('HOW TO MAP YOUR 3D MODEL PARTS:');
-    console.log('1. Click on any part of the 3D leg');
-    console.log('2. Check console for the mesh name');
-    console.log('3. Add that name as a key in INJURY_DATA');
-    console.log('');
-    console.log('CONTROLS:');
-    console.log('- Left click drag: Rotate model');
-    console.log('- Right click drag: Pan camera');
-    console.log('- Scroll wheel: Move model up/down');
-    console.log('- Ctrl+Scroll: Zoom in/out');
   </script>
 
 </body>
